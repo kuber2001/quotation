@@ -2,8 +2,9 @@ import { motion } from 'framer-motion'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { firms } from './FirmSelect'
+import { marbleTypes } from './MurtiForm'
 
-function PDFGenerator({ documentType, firmName, customerName, customerPhone, customerAddress, advanceAmount, murtis, totalPrice }) {
+function PDFGenerator({ documentType, firmName, customerName, customerPhone, customerAddress, advanceAmount, notes, murtis }) {
   const generatePDF = () => {
     const doc = new jsPDF()
     const firm = firms.find(f => f.name === firmName)
@@ -94,18 +95,45 @@ function PDFGenerator({ documentType, firmName, customerName, customerPhone, cus
     
     // Items Table
     yPos += 5
-    const tableData = murtis.map((murti, index) => [
-      index + 1,
-      murti.godName,
-      murti.quality,
-      `${murti.size} ft`,
-      `Rs. ${Number(murti.price).toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`,
-      murti.notes || '-'
-    ])
+    
+    // Calculate subtotals for each marble type
+    const subtotals = marbleTypes.reduce((acc, type) => {
+      acc[type.key] = murtis.reduce((sum, murti) => {
+        const price = murti[type.key] && murti[type.key].trim() !== '' ? parseInt(murti[type.key], 10) : 0
+        return sum + price
+      }, 0)
+      return acc
+    }, {})
+    
+    const tableData = murtis.map((murti, index) => {
+      const row = [
+        index + 1,
+        murti.statueName,
+        `${murti.size} ft`
+      ]
+      // Add marble type prices
+      marbleTypes.forEach(type => {
+        const price = murti[type.key] && murti[type.key].trim() !== '' 
+          ? `Rs. ${parseInt(murti[type.key], 10).toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`
+          : '-'
+        row.push(price)
+      })
+      return row
+    })
+    
+    // Add subtotal row
+    const subtotalRow = ['', 'Total', '']
+    marbleTypes.forEach(type => {
+      const total = subtotals[type.key] > 0 
+        ? `Rs. ${subtotals[type.key].toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`
+        : '-'
+      subtotalRow.push(total)
+    })
+    tableData.push(subtotalRow)
     
     autoTable(doc, {
       startY: yPos,
-      head: [['#', 'God Name', 'Quality', 'Size', 'Price', 'Notes']],
+      head: [['#', 'Statue Name', 'Size', ...marbleTypes.map(t => t.label)]],
       body: tableData,
       theme: 'striped',
       headStyles: {
@@ -120,51 +148,91 @@ function PDFGenerator({ documentType, firmName, customerName, customerPhone, cus
         textColor: [60, 60, 60]
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 10 },
-        1: { halign: 'left', cellWidth: 45 },
-        2: { halign: 'center', cellWidth: 20 },
-        3: { halign: 'center', cellWidth: 20 },
-        4: { halign: 'right', cellWidth: 30 },
-        5: { halign: 'left', cellWidth: 'auto' }
+        0: { halign: 'center', cellWidth: 8 },
+        1: { halign: 'left', cellWidth: 38 },
+        2: { halign: 'center', cellWidth: 18 },
+        3: { halign: 'right', cellWidth: 21 },
+        4: { halign: 'right', cellWidth: 21 },
+        5: { halign: 'right', cellWidth: 21 },
+        6: { halign: 'right', cellWidth: 21 },
+        7: { halign: 'right', cellWidth: 21 }
       },
       alternateRowStyles: {
         fillColor: [250, 250, 250]
       },
-      margin: { left: 20, right: 20 }
+      margin: { left: 20, right: 20 },
+      tableWidth: 'auto',
+      didParseCell: function (data) {
+        // Style the subtotal row
+        if (data.row.index === tableData.length - 1) {
+          data.cell.styles.fillColor = [255, 245, 220] // Gold background
+          data.cell.styles.fontStyle = 'bold'
+          data.cell.styles.textColor = [80, 50, 0]
+        }
+      }
     })
     
-    // Total Section
-    const finalY = doc.lastAutoTable.finalY + 10
+    // Get position after table
+    let finalY = doc.lastAutoTable.finalY + 10
     
-    // Calculate balance for orders with advance - ensure proper number handling
-    const advance = documentType === 'Order' && advanceAmount && advanceAmount.trim() !== '' 
-      ? Math.round(Number(advanceAmount)) 
-      : 0
-    const balance = Math.round(totalPrice - advance)
-    
-    // Total Amount Box
-    doc.setFillColor(255, 245, 220)
-    const boxHeight = documentType === 'Order' && advance > 0 ? 30 : 15
-    doc.roundedRect(20, finalY, 170, boxHeight, 3, 3, 'F')
-    
-    doc.setFontSize(14)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(80, 50, 0)
-    doc.text('Total Amount:', 25, finalY + 10)
-    doc.text(`Rs. ${totalPrice.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`, 185, finalY + 10, { align: 'right' })
-    
-    // Show advance and balance for orders
-    if (documentType === 'Order' && advance > 0) {
-      doc.setFontSize(12)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(60, 100, 60) // Green for advance
-      doc.text('Advance Received:', 25, finalY + 20)
-      doc.text(`Rs. ${advance.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`, 185, finalY + 20, { align: 'right' })
+    // Grand Total Section - ONLY for Orders
+    if (documentType === 'Order') {
+      // Calculate grand total from all marble types
+      const grandTotal = murtis.reduce((sum, murti) => {
+        const vietnam = murti.vietnam && murti.vietnam.trim() !== '' ? parseInt(murti.vietnam, 10) : 0
+        const makrana1st = murti.makrana1st && murti.makrana1st.trim() !== '' ? parseInt(murti.makrana1st, 10) : 0
+        const makrana15 = murti.makrana15 && murti.makrana15.trim() !== '' ? parseInt(murti.makrana15, 10) : 0
+        const makrana2nd = murti.makrana2nd && murti.makrana2nd.trim() !== '' ? parseInt(murti.makrana2nd, 10) : 0
+        const black = murti.black && murti.black.trim() !== '' ? parseInt(murti.black, 10) : 0
+        return sum + vietnam + makrana1st + makrana15 + makrana2nd + black
+      }, 0)
       
+      // Total Amount Box
+      doc.setFillColor(255, 245, 220) // Gold background
+      doc.roundedRect(20, finalY, 170, 15, 3, 3, 'F')
+      
+      doc.setFontSize(14)
       doc.setFont('helvetica', 'bold')
-      doc.setTextColor(200, 50, 50) // Red for balance
-      doc.text('Balance Due:', 25, finalY + 30)
-      doc.text(`Rs. ${balance.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`, 185, finalY + 30, { align: 'right' })
+      doc.setTextColor(80, 50, 0)
+      doc.text('Total Amount:', 25, finalY + 10)
+      doc.text(`Rs. ${grandTotal.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`, 185, finalY + 10, { align: 'right' })
+      
+      finalY += 25 // Move position down for next sections
+    }
+    
+    // Notes Section (if provided)
+    if (notes && notes.trim()) {
+      const notesStartY = finalY + 5
+      
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(80, 50, 0)
+      doc.text('Notes:', 20, notesStartY)
+      
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(60, 60, 60)
+      const notesLines = doc.splitTextToSize(notes, 170)
+      let notesY = notesStartY + 6
+      notesLines.forEach(line => {
+        doc.text(line, 20, notesY)
+        notesY += 5
+      })
+    }
+    
+    // Advance Amount Section for Orders (if provided)
+    if (documentType === 'Order' && advanceAmount && advanceAmount.toString().trim() !== '') {
+      const advance = parseInt(advanceAmount, 10)
+      const advanceY = notes && notes.trim() ? finalY + 35 : finalY + 5
+      
+      doc.setFillColor(220, 255, 220) // Light green background
+      doc.roundedRect(20, advanceY, 170, 10, 2, 2, 'F')
+      
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(60, 100, 60) // Green
+      doc.text('Advance Amount Received:', 25, advanceY + 7)
+      doc.text(`Rs. ${advance.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}`, 185, advanceY + 7, { align: 'right' })
     }
     
     // Footer

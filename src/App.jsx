@@ -13,6 +13,7 @@ function App() {
   const [customerAddress, setCustomerAddress] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [advanceAmount, setAdvanceAmount] = useState('')
+  const [notes, setNotes] = useState('')
   const [murtis, setMurtis] = useState([])
 
   const addMurti = (murti) => {
@@ -26,8 +27,6 @@ function App() {
   const clearAll = () => {
     setMurtis([])
   }
-
-  const totalPrice = murtis.reduce((sum, murti) => sum + Number(murti.price || 0), 0)
 
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
@@ -145,20 +144,18 @@ function App() {
               onClearAll={clearAll}
             />
 
-            {/* Summary Section */}
+            {/* Notes Section */}
             <div className="glass-card marble-texture rounded-3xl shadow-xl p-6 sm:p-8 mb-8">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="text-center sm:text-left">
-                  <p className="text-marble-500 text-sm font-medium">Total Items</p>
-                  <p className="text-3xl font-bold text-marble-800">{murtis.length}</p>
-                </div>
-                <div className="text-center sm:text-right">
-                  <p className="text-marble-500 text-sm font-medium">Total Price</p>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-yellow-600 bg-clip-text text-transparent">
-                    ₹{totalPrice.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}
-                  </p>
-                </div>
-              </div>
+              <label className="block text-marble-700 text-sm font-semibold mb-3">
+                Additional Notes (Optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows="4"
+                placeholder="Add any special requirements, terms & conditions, or additional information..."
+                className="w-full px-4 py-3 rounded-2xl border-2 border-marble-200 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm resize-none"
+              />
             </div>
 
             {/* PDF Generator Button */}
@@ -169,8 +166,8 @@ function App() {
               customerPhone={customerPhone}
               customerAddress={customerAddress}
               advanceAmount={advanceAmount}
-              murtis={murtis} 
-              totalPrice={totalPrice}
+              notes={notes}
+              murtis={murtis}
             />
           </motion.div>
         )}

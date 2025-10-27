@@ -1,25 +1,43 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 
-const godNames = [
+const statueNames = [
   'Radha Krishna',
   'Shankar Parvati',
   'Ganesh Ji',
   'Ram Darbar',
   'Shiv Parivar',
+  'Durga Mata Ji',
+  'Iskon Radha Krishna',
+  'Mahadev',
+  'Buddha',
+  'Hanuman Ji',
+  'Ganesh Laxmi Saraswati',
+  'Murgan Swamy',
+  'Jugal Radha Krishna',
+  'Cow',
+  'Shivling',
   'Custom'
 ]
 
-const qualities = ['1st', '2nd', '3rd']
+const marbleTypes = [
+  { key: 'vietnam', label: 'Vietnam' },
+  { key: 'makrana1st', label: '1st' },
+  { key: 'makrana15', label: '1.5' },
+  { key: 'makrana2nd', label: '2nd' },
+  { key: 'black', label: 'Black' }
+]
 
 function MurtiForm({ onAdd }) {
   const [formData, setFormData] = useState({
-    godName: 'Radha Krishna',
-    customGodName: '',
-    quality: '1st',
+    statueName: 'Radha Krishna',
+    customStatueName: '',
     size: '',
-    price: '',
-    notes: ''
+    vietnam: '',
+    makrana1st: '',
+    makrana15: '',
+    makrana2nd: '',
+    black: ''
   })
 
   const [errors, setErrors] = useState({})
@@ -40,8 +58,8 @@ function MurtiForm({ onAdd }) {
   const validate = () => {
     const newErrors = {}
     
-    if (formData.godName === 'Custom' && !formData.customGodName.trim()) {
-      newErrors.customGodName = 'Please enter custom god name'
+    if (formData.statueName === 'Custom' && !formData.customStatueName.trim()) {
+      newErrors.customStatueName = 'Please enter custom statue name'
     }
     
     if (!formData.size.trim()) {
@@ -50,11 +68,20 @@ function MurtiForm({ onAdd }) {
       newErrors.size = 'Please enter valid size'
     }
     
-    if (!formData.price.trim()) {
-      newErrors.price = 'Price is required'
-    } else if (isNaN(formData.price) || parseFloat(formData.price) <= 0) {
-      newErrors.price = 'Please enter valid price'
+    // Check if at least one marble type has a price
+    const hasPrice = marbleTypes.some(type => formData[type.key] && formData[type.key].trim() !== '')
+    if (!hasPrice) {
+      newErrors.prices = 'Please enter at least one marble type price'
     }
+    
+    // Validate each marble type price if provided
+    marbleTypes.forEach(type => {
+      if (formData[type.key] && formData[type.key].trim() !== '') {
+        if (isNaN(formData[type.key]) || parseFloat(formData[type.key]) <= 0) {
+          newErrors[type.key] = 'Please enter valid price'
+        }
+      }
+    })
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -65,26 +92,30 @@ function MurtiForm({ onAdd }) {
     
     if (!validate()) return
 
-    const finalGodName = formData.godName === 'Custom' 
-      ? formData.customGodName 
-      : formData.godName
+    const finalStatueName = formData.statueName === 'Custom' 
+      ? formData.customStatueName 
+      : formData.statueName
 
     onAdd({
-      godName: finalGodName,
-      quality: formData.quality,
+      statueName: finalStatueName,
       size: formData.size,
-      price: formData.price,
-      notes: formData.notes
+      vietnam: formData.vietnam,
+      makrana1st: formData.makrana1st,
+      makrana15: formData.makrana15,
+      makrana2nd: formData.makrana2nd,
+      black: formData.black
     })
 
     // Reset form
     setFormData({
-      godName: 'Radha Krishna',
-      customGodName: '',
-      quality: '1st',
+      statueName: 'Radha Krishna',
+      customStatueName: '',
       size: '',
-      price: '',
-      notes: ''
+      vietnam: '',
+      makrana1st: '',
+      makrana15: '',
+      makrana2nd: '',
+      black: ''
     })
 
     // Show success animation
@@ -94,122 +125,99 @@ function MurtiForm({ onAdd }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* God Name */}
+      {/* Statue Name */}
       <div>
         <label className="block text-marble-700 text-sm font-semibold mb-2">
-          God Name
+          Statue Name
         </label>
         <select
-          name="godName"
-          value={formData.godName}
+          name="statueName"
+          value={formData.statueName}
           onChange={handleChange}
           className="w-full px-4 py-3 rounded-2xl border-2 border-marble-200 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm"
         >
-          {godNames.map(name => (
+          {statueNames.map(name => (
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
       </div>
 
-      {/* Custom God Name */}
-      {formData.godName === 'Custom' && (
+      {/* Custom Statue Name */}
+      {formData.statueName === 'Custom' && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
         >
           <label className="block text-marble-700 text-sm font-semibold mb-2">
-            Custom God Name
+            Custom Statue Name
           </label>
           <input
             type="text"
-            name="customGodName"
-            value={formData.customGodName}
+            name="customStatueName"
+            value={formData.customStatueName}
             onChange={handleChange}
-            placeholder="Enter custom god name"
+            placeholder="Enter custom statue name"
             className={`w-full px-4 py-3 rounded-2xl border-2 ${
-              errors.customGodName ? 'border-red-400' : 'border-marble-200'
+              errors.customStatueName ? 'border-red-400' : 'border-marble-200'
             } focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm`}
           />
-          {errors.customGodName && (
-            <p className="text-red-500 text-xs mt-1">{errors.customGodName}</p>
+          {errors.customStatueName && (
+            <p className="text-red-500 text-xs mt-1">{errors.customStatueName}</p>
           )}
         </motion.div>
       )}
 
-      {/* Quality and Size - Side by side on larger screens */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-        {/* Marble Quality */}
-        <div>
-          <label className="block text-marble-700 text-sm font-semibold mb-2">
-            Marble Quality
-          </label>
-          <select
-            name="quality"
-            value={formData.quality}
-            onChange={handleChange}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-marble-200 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm"
-          >
-            {qualities.map(q => (
-              <option key={q} value={q}>{q}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Size */}
-        <div>
-          <label className="block text-marble-700 text-sm font-semibold mb-2">
-            Size (in feet)
-          </label>
-          <input
-            type="text"
-            name="size"
-            value={formData.size}
-            onChange={handleChange}
-            placeholder="e.g., 2.5"
-            className={`w-full px-4 py-3 rounded-2xl border-2 ${
-              errors.size ? 'border-red-400' : 'border-marble-200'
-            } focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm`}
-          />
-          {errors.size && (
-            <p className="text-red-500 text-xs mt-1">{errors.size}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Price */}
+      {/* Size */}
       <div>
         <label className="block text-marble-700 text-sm font-semibold mb-2">
-          Price (₹)
+          Size (in feet)
         </label>
         <input
-          type="number"
-          name="price"
-          value={formData.price}
+          type="text"
+          name="size"
+          value={formData.size}
           onChange={handleChange}
-          placeholder="Enter price"
+          placeholder="e.g., 2.5"
           className={`w-full px-4 py-3 rounded-2xl border-2 ${
-            errors.price ? 'border-red-400' : 'border-marble-200'
+            errors.size ? 'border-red-400' : 'border-marble-200'
           } focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm`}
         />
-        {errors.price && (
-          <p className="text-red-500 text-xs mt-1">{errors.price}</p>
+        {errors.size && (
+          <p className="text-red-500 text-xs mt-1">{errors.size}</p>
         )}
       </div>
 
-      {/* Additional Notes */}
+      {/* Marble Type Prices */}
       <div>
-        <label className="block text-marble-700 text-sm font-semibold mb-2">
-          Additional Notes (Optional)
+        <label className="block text-marble-700 text-sm font-semibold mb-3">
+          Marble Type Prices (Enter at least one)
         </label>
-        <textarea
-          name="notes"
-          value={formData.notes}
-          onChange={handleChange}
-          rows="3"
-          placeholder="Any special requirements or notes..."
-          className="w-full px-4 py-3 rounded-2xl border-2 border-marble-200 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm resize-none"
-        />
+        {errors.prices && (
+          <p className="text-red-500 text-xs mb-2">{errors.prices}</p>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {marbleTypes.map(type => (
+            <div key={type.key}>
+              <label className="block text-marble-600 text-xs font-medium mb-1">
+                {type.label}
+              </label>
+              <input
+                type="number"
+                name={type.key}
+                value={formData[type.key]}
+                onChange={handleChange}
+                placeholder="Optional"
+                className={`w-full px-4 py-3 rounded-2xl border-2 ${
+                  errors[type.key] ? 'border-red-400' : 'border-marble-200'
+                } focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-white text-marble-800 shadow-sm`}
+              />
+              {errors[type.key] && (
+                <p className="text-red-500 text-xs mt-1">{errors[type.key]}</p>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Submit Button */}
@@ -234,4 +242,5 @@ function MurtiForm({ onAdd }) {
 }
 
 export default MurtiForm
+export { marbleTypes }
 

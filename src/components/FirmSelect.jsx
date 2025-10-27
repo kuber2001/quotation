@@ -14,7 +14,7 @@ const firms = [
     address: '3475, Kalyan Ji Ka Rasta, 1th Crossing, Chandpole Bazar, Chandpole, Pink City, Jaipur, Rajasthan 302001',
     email: 'smkk3467@gmail.com',
     phones: ['0141 2311864', '+91 9828340547', '+91 8890655797']
-  }
+  },
 ]
 
 function FirmSelect({ selectedFirm, setSelectedFirm }) {
