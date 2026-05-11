@@ -14,6 +14,7 @@ function App() {
   const [customerPhone, setCustomerPhone] = useState('')
   const [advanceAmount, setAdvanceAmount] = useState('')
   const [notes, setNotes] = useState('')
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-CA'))
   const [murtis, setMurtis] = useState([])
 
   const addMurti = (murti) => {
@@ -39,19 +40,38 @@ function App() {
           transition={{ duration: 0.6 }}
           className="glass-card marble-texture rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 mb-8"
         >
-          {/* Document Type Selection */}
-          <div className="mb-8">
-            <label className="block text-marble-700 text-sm font-semibold mb-3">
-              Document Type
-            </label>
-            <select
-              value={documentType}
-              onChange={(e) => setDocumentType(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gold-300 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-gradient-to-r from-gold-50 to-amber-50 text-marble-800 font-bold shadow-md text-lg"
-            >
-              <option value="Quotation">Quotation</option>
-              <option value="Order">Order</option>
-            </select>
+          {/* Document Type & Date Selection */}
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-marble-700 text-sm font-semibold mb-3">
+                Document Type
+              </label>
+              <select
+                value={documentType}
+                onChange={(e) => setDocumentType(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-gold-300 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-200 transition-all bg-gradient-to-r from-gold-50 to-amber-50 text-marble-800 font-bold shadow-md text-lg"
+              >
+                <option value="Quotation">Quotation</option>
+                <option value="Order">Order</option>
+              </select>
+            </div>
+            <div className="relative group">
+              <label className="block text-marble-700 text-sm font-semibold mb-3 flex items-center gap-2">
+                <span>Date</span>
+                <span className="text-xs font-normal text-marble-400">(Select past or present)</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gold-500 pointer-events-none z-10 text-xl group-hover:scale-110 transition-transform duration-300">
+                  📅
+                </span>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-gold-300 focus:border-gold-500 focus:outline-none focus:ring-4 focus:ring-gold-100 transition-all bg-white text-marble-800 font-bold shadow-lg text-lg appearance-none cursor-pointer hover:border-gold-400 hover:shadow-xl active:scale-[0.99]"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="border-t-2 border-marble-200 pt-6"></div>
@@ -167,6 +187,7 @@ function App() {
               customerAddress={customerAddress}
               advanceAmount={advanceAmount}
               notes={notes}
+              date={date}
               murtis={murtis}
             />
           </motion.div>

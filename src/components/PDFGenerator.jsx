@@ -4,7 +4,7 @@ import autoTable from 'jspdf-autotable'
 import { firms } from './FirmSelect'
 import { marbleTypes } from './MurtiForm'
 
-function PDFGenerator({ documentType, firmName, customerName, customerPhone, customerAddress, advanceAmount, notes, murtis }) {
+function PDFGenerator({ documentType, firmName, customerName, customerPhone, customerAddress, advanceAmount, notes, date, murtis }) {
   const generatePDF = () => {
     const doc = new jsPDF()
     const firm = firms.find(f => f.name === firmName)
@@ -61,12 +61,12 @@ function PDFGenerator({ documentType, firmName, customerName, customerPhone, cus
     doc.setFontSize(10)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(100, 100, 100)
-    const date = new Date().toLocaleDateString('en-IN', {
+    const formattedDate = new Date(date).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     })
-    doc.text(`Date: ${date}`, 190, yPos, { align: 'right' })
+    doc.text(`Date: ${formattedDate}`, 190, yPos, { align: 'right' })
     
     // Customer Information (if provided)
     if (customerName && customerName.trim()) {
@@ -247,7 +247,7 @@ function PDFGenerator({ documentType, firmName, customerName, customerPhone, cus
     doc.text(footerText, 105, pageHeight - 15, { align: 'center' })
     
     // Save PDF
-    const fileName = `${documentType}_${firmName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`
+    const fileName = `${documentType}_${firmName.replace(/\s+/g, '_')}_${date}.pdf`
     doc.save(fileName)
   }
 

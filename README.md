@@ -16,7 +16,7 @@ A beautiful, modern, and fully responsive web application for generating profess
 ## 🏢 Supported Firms
 
 ### 1. MARBLE MOORTIS
-- **GST**: 08CEYPV0867EIZP
+- **GST**: 08ADMPV3074C1ZC
 - **Location**: Jaipur, Rajasthan
 - **Contact**: Mr. Jitendra Vajpayee
 

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 const firms = [
   {
     name: 'MARBLE MOORTIS',
-    gst: '08CEYPV0867EIZP',
+    gst: '08ADMPV3074C1ZC',
     address: '3467, Vajpayee Bhawan, Kalyan Ji Ka Rasta, Chandpole Bazar, Jaipur',
     email: 'marblemoortis@gmail.com',
     phones: ['7877350555', '7690078269'],
