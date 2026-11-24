@@ -179,12 +179,11 @@ function PDFGenerator({ documentType, firmName, customerName, customerPhone, cus
     if (documentType === 'Order') {
       // Calculate grand total from all marble types
       const grandTotal = murtis.reduce((sum, murti) => {
-        const vietnam = murti.vietnam && murti.vietnam.trim() !== '' ? parseInt(murti.vietnam, 10) : 0
-        const makrana1st = murti.makrana1st && murti.makrana1st.trim() !== '' ? parseInt(murti.makrana1st, 10) : 0
-        const makrana15 = murti.makrana15 && murti.makrana15.trim() !== '' ? parseInt(murti.makrana15, 10) : 0
-        const makrana2nd = murti.makrana2nd && murti.makrana2nd.trim() !== '' ? parseInt(murti.makrana2nd, 10) : 0
-        const black = murti.black && murti.black.trim() !== '' ? parseInt(murti.black, 10) : 0
-        return sum + vietnam + makrana1st + makrana15 + makrana2nd + black
+        const rowTotal = marbleTypes.reduce((typeSum, type) => {
+          const price = murti[type.key] && murti[type.key].trim() !== '' ? parseInt(murti[type.key], 10) : 0
+          return typeSum + price
+        }, 0)
+        return sum + rowTotal
       }, 0)
       
       // Total Amount Box

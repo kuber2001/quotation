@@ -21,10 +21,10 @@ const statueNames = [
 ]
 
 const marbleTypes = [
-  { key: 'vietnam', label: 'Vietnam' },
   { key: 'makrana1st', label: '1st' },
   { key: 'makrana15', label: '1.5' },
   { key: 'makrana2nd', label: '2nd' },
+  { key: 'makrana3rd', label: '3rd' },
   { key: 'black', label: 'Black' }
 ]
 
@@ -33,10 +33,10 @@ function MurtiForm({ onAdd }) {
     statueName: 'Radha Krishna',
     customStatueName: '',
     size: '',
-    vietnam: '',
     makrana1st: '',
     makrana15: '',
     makrana2nd: '',
+    makrana3rd: '',
     black: ''
   })
 
@@ -99,10 +99,10 @@ function MurtiForm({ onAdd }) {
     onAdd({
       statueName: finalStatueName,
       size: formData.size,
-      vietnam: formData.vietnam,
       makrana1st: formData.makrana1st,
       makrana15: formData.makrana15,
       makrana2nd: formData.makrana2nd,
+      makrana3rd: formData.makrana3rd,
       black: formData.black
     })
 
@@ -111,10 +111,10 @@ function MurtiForm({ onAdd }) {
       statueName: 'Radha Krishna',
       customStatueName: '',
       size: '',
-      vietnam: '',
       makrana1st: '',
       makrana15: '',
       makrana2nd: '',
+      makrana3rd: '',
       black: ''
     })
 
